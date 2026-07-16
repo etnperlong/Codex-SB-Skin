@@ -1,0 +1,4 @@
+interface:
+  display_name: "Develop Codex Themes"
+  short_description: "Design, implement, and verify Codex Dream Skin themes"
+  default_prompt: "Use $develop-codex-themes to design and verify a Codex Dream Skin theme safely."
