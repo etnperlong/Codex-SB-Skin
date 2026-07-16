@@ -29,6 +29,23 @@ if /usr/bin/grep -n -E '/usr/bin/python3|(^|[[:space:]])eval([[:space:]]|$)' \
 fi
 
 "$NODE" "$ROOT/scripts/injector.mjs" --check-payload >/dev/null
+"$NODE" --input-type=module -e '
+  import fs from "node:fs";
+  import { pathToFileURL } from "node:url";
+  const root = process.argv[1];
+  const { normalizeTheme } = await import(pathToFileURL(`${root}/scripts/theme-schema.mjs`));
+  const theme = normalizeTheme(JSON.parse(fs.readFileSync(`${root}/assets/theme.json`, "utf8")));
+  const css = fs.readFileSync(`${root}/assets/dream-skin.css`, "utf8");
+  const references = new Set([...css.matchAll(/var\((--ds-[a-z0-9-]+)/g)].map((match) => match[1]));
+  const supplied = new Set([
+    ...Object.keys(theme.cssVariables.shared),
+    ...Object.keys(theme.cssVariables.dark),
+    ...Object.keys(theme.cssVariables.light),
+  ]);
+  const aliases = new Set([...css.matchAll(/^\s*(--ds-[a-z0-9-]+):/gm)].map((match) => match[1]));
+  const missing = [...references].filter((name) => !supplied.has(name) && !aliases.has(name));
+  if (missing.length) throw new Error(`Missing semantic theme variables: ${missing.join(", ")}`);
+' "$ROOT"
 
 TMP="$(/usr/bin/mktemp -d /tmp/codex-dream-skin-tests.XXXXXX)"
 trap '/bin/rm -rf "$TMP"' EXIT
@@ -84,8 +101,57 @@ fi
 PAYLOAD_JSON="$("$NODE" "$ROOT/scripts/injector.mjs" --check-payload --theme-dir "$TMP/theme")"
 "$NODE" -e '
   const value = JSON.parse(process.argv[1]);
-  if (!value.pass || value.themeName !== "测试主题" || value.imageBytes < 1) process.exit(1);
+  if (!value.pass || value.themeName !== "测试主题" || value.themeSchemaVersion !== 2 ||
+      value.sourceSchemaVersion !== 2 || value.themeVariableCount < 120 || value.imageBytes < 1) process.exit(1);
 ' "$PAYLOAD_JSON"
+"$NODE" -e '
+  const fs = require("node:fs");
+  const theme = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+  if (theme.schemaVersion !== 2 || !theme.tokens?.shared?.typography?.uiFont ||
+      !theme.tokens?.dark?.color?.messageUser || !theme.tokens?.light?.color?.popover ||
+      theme.tokens.dark.color.accent !== "#11aa55" ||
+      theme.tokens.light.color.accentSecondary !== "#22bbcc") process.exit(1);
+' "$TMP/theme/theme.json"
+
+LEGACY_THEME="$TMP/legacy-theme"
+/bin/mkdir -p "$LEGACY_THEME"
+/bin/cp "$ROOT/assets/portal-hero.png" "$LEGACY_THEME/background.png"
+"$NODE" -e '
+  const fs = require("node:fs");
+  const file = process.argv[1];
+  fs.writeFileSync(file, `${JSON.stringify({
+    schemaVersion: 1,
+    id: "legacy",
+    name: "旧版中文主题",
+    image: "background.png",
+    colors: { accent: "#11aa55", secondary: "#22bbcc", highlight: "#663399" },
+  }, null, 2)}\n`);
+' "$LEGACY_THEME/theme.json"
+LEGACY_PAYLOAD_JSON="$("$NODE" "$ROOT/scripts/injector.mjs" --check-payload --theme-dir "$LEGACY_THEME")"
+"$NODE" -e '
+  const value = JSON.parse(process.argv[1]);
+  if (!value.pass || value.themeName !== "旧版中文主题" || value.themeSchemaVersion !== 2 ||
+      value.sourceSchemaVersion !== 1 || value.themeVariableCount < 120) process.exit(1);
+' "$LEGACY_PAYLOAD_JSON"
+
+INVALID_THEME="$TMP/invalid-semantic-theme"
+/bin/mkdir -p "$INVALID_THEME"
+/bin/cp "$ROOT/assets/portal-hero.png" "$INVALID_THEME/background.png"
+"$NODE" -e '
+  const fs = require("node:fs");
+  const source = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+  source.image = "background.png";
+  source.tokens.dark.effect.cardShadow = "0 0 1px red; display:none";
+  fs.writeFileSync(process.argv[2], `${JSON.stringify(source, null, 2)}\n`);
+' "$ROOT/assets/theme.json" "$INVALID_THEME/theme.json"
+if INVALID_TOKEN_OUTPUT="$(
+  "$NODE" "$ROOT/scripts/injector.mjs" --check-payload --theme-dir "$INVALID_THEME" 2>&1
+)"; then
+  printf 'Unsafe semantic theme token unexpectedly passed.\n' >&2
+  exit 1
+fi
+/usr/bin/printf '%s\n' "$INVALID_TOKEN_OUTPUT" | /usr/bin/grep -F -q \
+  "Theme token tokens.dark.effect.cardShadow contains an unsafe CSS value."
 /bin/mkdir -p "$TMP/missing-theme"
 if MISSING_THEME_OUTPUT="$(
   "$NODE" "$ROOT/scripts/injector.mjs" --check-payload --theme-dir "$TMP/missing-theme" 2>&1
@@ -138,7 +204,7 @@ HOME="$INSTALL_HOME" "$ROOT/scripts/install-dream-skin-macos.sh" \
 [ -f "$INSTALL_HOME/Library/Application Support/CodexDreamSkinStudio/theme-backup.json" ]
 [ ! -e "$INSTALL_HOME/Library/Application Support/CodexDreamSkinStudio/theme" ]
 
-/usr/bin/env -u HOME /bin/bash -c '. "$1/scripts/common-macos.sh"; [ -n "$HOME" ] && [ "$SKIN_VERSION" = "1.1.2" ]' _ "$ROOT"
+/usr/bin/env -u HOME /bin/bash -c '. "$1/scripts/common-macos.sh"; [ -n "$HOME" ] && [ "$SKIN_VERSION" = "1.2.0" ]' _ "$ROOT"
 "$ROOT/scripts/doctor-macos.sh" >/dev/null
 
 printf 'PASS: syntax, payload, theme fallback, fresh install, runtime-state safety, custom-theme, config round-trips, HOME recovery, signature, and doctor checks.\n'

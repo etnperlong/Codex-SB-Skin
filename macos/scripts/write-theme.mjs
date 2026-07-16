@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createThemeTokens, THEME_SCHEMA_VERSION } from "./theme-schema.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
@@ -66,9 +67,63 @@ const quote = valueFor("quote", "MAKE SOMETHING WONDERFUL").trim().slice(0, 80);
 const accent = validateHex(valueFor("accent", "#7cff46"), "accent");
 const secondary = validateHex(valueFor("secondary", "#36d7e8"), "secondary");
 const highlight = validateHex(valueFor("highlight", "#642a8c"), "highlight");
+const tokens = createThemeTokens({
+  dark: {
+    color: {
+      accent,
+      accentHover: accent,
+      accentActive: accent,
+      accentSecondary: secondary,
+      accentTertiary: highlight,
+      accentSoft: hexToRgba(accent, 0.10),
+      focusRing: hexToRgba(accent, 0.52),
+      sidebarHover: hexToRgba(accent, 0.15),
+      sidebarSelected: hexToRgba(accent, 0.20),
+      sidebarSelectedBorder: hexToRgba(accent, 0.24),
+      cardHoverBorder: hexToRgba(accent, 0.52),
+      composerBorder: hexToRgba(accent, 0.32),
+      controlHover: hexToRgba(accent, 0.15),
+      controlSelected: hexToRgba(accent, 0.20),
+      controlPrimary: accent,
+      projectBorder: hexToRgba(accent, 0.30),
+      heroBorder: hexToRgba(accent, 0.62),
+      divider: hexToRgba(accent, 0.14),
+      scrollbar: hexToRgba(accent, 0.40),
+      selection: hexToRgba(accent, 0.24),
+      success: accent,
+      decorationPrimary: accent,
+      decorationSecondary: secondary,
+    },
+  },
+  light: {
+    color: {
+      accent,
+      accentHover: accent,
+      accentActive: highlight,
+      accentSecondary: secondary,
+      accentTertiary: highlight,
+      accentSoft: hexToRgba(accent, 0.10),
+      focusRing: hexToRgba(accent, 0.35),
+      sidebarHover: hexToRgba(accent, 0.08),
+      sidebarSelected: hexToRgba(accent, 0.10),
+      sidebarSelectedBorder: hexToRgba(accent, 0.14),
+      cardHoverBorder: hexToRgba(accent, 0.35),
+      composerBorder: hexToRgba(accent, 0.18),
+      controlHover: hexToRgba(accent, 0.08),
+      controlSelected: hexToRgba(accent, 0.10),
+      controlPrimary: accent,
+      projectBorder: hexToRgba(accent, 0.28),
+      divider: hexToRgba(accent, 0.12),
+      scrollbar: hexToRgba(accent, 0.35),
+      selection: hexToRgba(accent, 0.16),
+      decorationPrimary: accent,
+      decorationSecondary: secondary,
+    },
+  },
+});
 
 const custom = {
-  schemaVersion: 1,
+  schemaVersion: THEME_SCHEMA_VERSION,
   id: `custom-${Date.now()}`,
   name: name || "我的 Codex Dream Skin",
   brandSubtitle: "CODEX DREAM SKIN",
@@ -78,18 +133,7 @@ const custom = {
   statusText: "DREAM SKIN ONLINE",
   quote: quote || "MAKE SOMETHING WONDERFUL",
   image,
-  colors: {
-    background: "#071116",
-    panel: "#0b1a20",
-    panelAlt: "#10272c",
-    accent,
-    accentAlt: accent,
-    secondary,
-    highlight,
-    text: "#f2fff7",
-    muted: "#a7c2ba",
-    line: hexToRgba(accent, 0.32),
-  },
+  tokens,
 };
 
 await atomicWrite(themePath, `${JSON.stringify(custom, null, 2)}\n`);

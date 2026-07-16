@@ -6,12 +6,13 @@
   const SHELL_ATTR = "data-dream-shell";
   const VERSION = __DREAM_SKIN_VERSION_JSON__;
   const THEME = themeConfig && typeof themeConfig === "object" ? themeConfig : {};
-  const THEME_VARIABLES = [
-    "--ds-bg", "--ds-panel", "--ds-panel-2", "--ds-green", "--ds-lime",
-    "--ds-cyan", "--ds-purple", "--ds-text", "--ds-muted", "--ds-line",
+  const THEME_VARIABLES = [...new Set([
+    ...Object.keys(THEME.cssVariables?.shared || {}),
+    ...Object.keys(THEME.cssVariables?.dark || {}),
+    ...Object.keys(THEME.cssVariables?.light || {}),
     "--dream-skin-name", "--dream-skin-tagline", "--dream-skin-project-prefix",
     "--dream-skin-project-label",
-  ];
+  ])];
   window[DISABLED_KEY] = false;
 
   const previous = window[STATE_KEY];
@@ -114,41 +115,10 @@
   };
 
   const applyTheme = (root, shell) => {
-    const colors = THEME.colors || {};
-    const accent = colors.accent || (shell === "light" ? "#e25563" : "#7cff46");
-    const accentAlt = colors.accentAlt || accent;
-    const secondary = colors.secondary || (shell === "light" ? "#f3a8af" : "#36d7e8");
-    const highlight = colors.highlight || (shell === "light" ? "#c93d4c" : "#642a8c");
-
-    let variables;
-    if (shell === "light") {
-      // Structural tokens stay light so banners stay readable; accents follow theme.
-      variables = {
-        "--ds-bg": "#f6f2f3",
-        "--ds-panel": "#ffffff",
-        "--ds-panel-2": "#fff7f8",
-        "--ds-green": accent,
-        "--ds-lime": accentAlt,
-        "--ds-cyan": secondary,
-        "--ds-purple": highlight,
-        "--ds-text": "#1f1a1b",
-        "--ds-muted": "#6b5f62",
-        "--ds-line": colors.line || "rgba(196, 120, 128, .22)",
-      };
-    } else {
-      variables = {
-        "--ds-bg": colors.background || "#071116",
-        "--ds-panel": colors.panel || "#0b1a20",
-        "--ds-panel-2": colors.panelAlt || "#10272c",
-        "--ds-green": accent,
-        "--ds-lime": accentAlt,
-        "--ds-cyan": secondary,
-        "--ds-purple": highlight,
-        "--ds-text": colors.text || "#e9fff1",
-        "--ds-muted": colors.muted || "#9ebdb3",
-        "--ds-line": colors.line || "rgba(124, 255, 70, .28)",
-      };
-    }
+    const variables = {
+      ...(THEME.cssVariables?.shared || {}),
+      ...(THEME.cssVariables?.[shell] || THEME.cssVariables?.dark || {}),
+    };
 
     for (const [name, value] of Object.entries(variables)) {
       if (typeof value === "string" && value) root.style.setProperty(name, value);
