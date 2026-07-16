@@ -43,6 +43,17 @@ ensure_state_root() {
   /bin/chmod 700 "$STATE_ROOT"
 }
 
+active_theme_dir() {
+  if [ -f "$THEME_DIR/theme.json" ]; then
+    printf '%s\n' "$THEME_DIR"
+    return 0
+  fi
+  if [ -e "$THEME_DIR" ]; then
+    fail "User theme directory exists but theme.json is missing: $THEME_DIR/theme.json"
+  fi
+  printf '%s\n' "$PROJECT_ROOT/assets"
+}
+
 discover_codex_app() {
   local candidate=""
   local identifier=""
@@ -302,6 +313,8 @@ write_state() {
   local exe="${CODEX_EXE:-}"
   local app_ver="${CODEX_VERSION:-}"
   local team="${CODEX_TEAM_ID:-}"
+  local theme_dir
+  theme_dir="$(active_theme_dir)"
   "$NODE" -e '
     const fs = require("node:fs");
     const [file, version, port, pid, startedAt, injector, node, nodeVersion, bundle, exe, appVersion, teamId, root, themeDir, codexPid, arch] = process.argv.slice(1);
@@ -327,7 +340,7 @@ write_state() {
     const temporary = `${file}.${process.pid}.tmp`;
     fs.writeFileSync(temporary, `${JSON.stringify(state, null, 2)}\n`, { mode: 0o600 });
     fs.renameSync(temporary, file);
-  ' "$STATE_PATH" "$SKIN_VERSION" "$port" "$injector_pid" "$injector_started_at" "$INJECTOR" "$NODE" "$node_ver" "$bundle" "$exe" "$app_ver" "$team" "$PROJECT_ROOT" "$THEME_DIR" "$codex_pid" "$(/usr/bin/uname -m)"
+  ' "$STATE_PATH" "$SKIN_VERSION" "$port" "$injector_pid" "$injector_started_at" "$INJECTOR" "$NODE" "$node_ver" "$bundle" "$exe" "$app_ver" "$team" "$PROJECT_ROOT" "$theme_dir" "$codex_pid" "$(/usr/bin/uname -m)"
 }
 
 stop_recorded_injector() {
@@ -391,12 +404,14 @@ launch_injector_daemon() {
   local port="$1"
   local pid=""
   local deadline=$((SECONDS + 10))
+  local theme_dir
+  theme_dir="$(active_theme_dir)"
   : > "$INJECTOR_LOG"
   : > "$INJECTOR_ERROR_LOG"
   /bin/launchctl remove "$INJECTOR_JOB_LABEL" >/dev/null 2>&1 || true
 
   # Prefer a direct background process — launchctl submit is unreliable on newer macOS.
-  /usr/bin/nohup "$NODE" "$INJECTOR" --watch --port "$port" --theme-dir "$THEME_DIR" \
+  /usr/bin/nohup "$NODE" "$INJECTOR" --watch --port "$port" --theme-dir "$theme_dir" \
     >>"$INJECTOR_LOG" 2>>"$INJECTOR_ERROR_LOG" &
   pid="$!"
   /bin/sleep 0.4
@@ -407,7 +422,7 @@ launch_injector_daemon() {
 
   # Fallback: launchctl submit
   /bin/launchctl submit -l "$INJECTOR_JOB_LABEL" -o "$INJECTOR_LOG" -e "$INJECTOR_ERROR_LOG" -- \
-    "$NODE" "$INJECTOR" --watch --port "$port" --theme-dir "$THEME_DIR" >/dev/null 2>&1 || true
+    "$NODE" "$INJECTOR" --watch --port "$port" --theme-dir "$theme_dir" >/dev/null 2>&1 || true
   /bin/launchctl kickstart -k "gui/$(/usr/bin/id -u)/$INJECTOR_JOB_LABEL" >/dev/null 2>&1 || true
   while [ "$SECONDS" -lt "$deadline" ]; do
     pid="$(/bin/launchctl print "gui/$(/usr/bin/id -u)/$INJECTOR_JOB_LABEL" 2>/dev/null \
@@ -470,9 +485,11 @@ ensure_node_runtime() {
 hot_reapply_theme() {
   local port="${1:-9341}"
   local timeout_ms="${2:-8000}"
+  local theme_dir
 
   cdp_http_ready "$port" || return 1
   ensure_node_runtime || return 1
+  theme_dir="$(active_theme_dir)"
 
   stop_recorded_injector 2>/dev/null || true
   # Kill any leftover watch injectors for this theme injector path
@@ -491,7 +508,7 @@ hot_reapply_theme() {
   /bin/kill -0 "$inj_pid" 2>/dev/null || return 1
 
   # One-shot reloads theme files from disk (watch may still be starting).
-  if ! "$NODE" "$INJECTOR" --once --port "$port" --theme-dir "$THEME_DIR" --timeout-ms "$timeout_ms" >/dev/null 2>&1; then
+  if ! "$NODE" "$INJECTOR" --once --port "$port" --theme-dir "$theme_dir" --timeout-ms "$timeout_ms" >/dev/null 2>&1; then
     # Soft: keep watch running even if once flaked
     :
   fi

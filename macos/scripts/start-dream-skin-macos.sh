@@ -32,6 +32,7 @@ case "$PORT" in ''|*[!0-9]*) fail "Invalid port: $PORT" ;; esac
 discover_codex_app
 require_macos_runtime
 ensure_state_root
+ACTIVE_THEME_DIR="$(active_theme_dir)"
 
 if [ "$PORT_EXPLICIT" = "false" ] && [ -f "$STATE_PATH" ]; then
   saved_port="$(state_field port)" || fail "Could not read the existing state port."
@@ -73,7 +74,7 @@ if [ -f "$STATE_PATH" ]; then
 fi
 
 if [ "$FOREGROUND_INJECTOR" = "true" ]; then
-  exec "$NODE" "$INJECTOR" --watch --port "$PORT" --theme-dir "$THEME_DIR"
+  exec "$NODE" "$INJECTOR" --watch --port "$PORT" --theme-dir "$ACTIVE_THEME_DIR"
 fi
 
 INJECTOR_PID="$(launch_injector_daemon "$PORT")"
@@ -86,14 +87,14 @@ write_state "$PORT" "$INJECTOR_PID" "$INJECTOR_STARTED_AT" "$CODEX_PID"
 
 # Soft verify: keep the injector even if secondary selectors differ by Codex version.
 set +e
-"$NODE" "$INJECTOR" --verify --port "$PORT" --theme-dir "$THEME_DIR" --timeout-ms 20000 >/tmp/dream-skin-verify.$$.json 2>/dev/null
+"$NODE" "$INJECTOR" --verify --port "$PORT" --theme-dir "$ACTIVE_THEME_DIR" --timeout-ms 20000 >/tmp/dream-skin-verify.$$.json 2>/dev/null
 verify_code=$?
 set -e
 if [ "$verify_code" -ne 0 ]; then
   # One more force inject before giving up
-  "$NODE" "$INJECTOR" --once --port "$PORT" --theme-dir "$THEME_DIR" --timeout-ms 15000 >/dev/null 2>&1 || true
+  "$NODE" "$INJECTOR" --once --port "$PORT" --theme-dir "$ACTIVE_THEME_DIR" --timeout-ms 15000 >/dev/null 2>&1 || true
   set +e
-  "$NODE" "$INJECTOR" --verify --port "$PORT" --theme-dir "$THEME_DIR" --timeout-ms 12000 >/tmp/dream-skin-verify.$$.json 2>/dev/null
+  "$NODE" "$INJECTOR" --verify --port "$PORT" --theme-dir "$ACTIVE_THEME_DIR" --timeout-ms 12000 >/tmp/dream-skin-verify.$$.json 2>/dev/null
   verify_code=$?
   set -e
 fi

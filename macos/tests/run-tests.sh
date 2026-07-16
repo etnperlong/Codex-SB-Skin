@@ -60,6 +60,22 @@ EXPECTED_TEAM_ID="TEAM'ID"
   exit 1
 }
 
+ACTIVE_THEME_DIR="$(HOME="$RUNTIME_HOME" /bin/bash -c '. "$1/scripts/common-macos.sh"; active_theme_dir' _ "$ROOT")"
+[ "$ACTIVE_THEME_DIR" = "$ROOT/assets" ] || {
+  printf 'Missing user theme did not fall back to bundled assets.\n' >&2
+  exit 1
+}
+/bin/mkdir -p "$RUNTIME_STATE_ROOT/theme"
+if BROKEN_THEME_OUTPUT="$(
+  HOME="$RUNTIME_HOME" /bin/bash -c '. "$1/scripts/common-macos.sh"; active_theme_dir' _ "$ROOT" 2>&1
+)"; then
+  printf 'Incomplete user theme directory unexpectedly fell back to bundled assets.\n' >&2
+  exit 1
+fi
+/usr/bin/printf '%s\n' "$BROKEN_THEME_OUTPUT" | /usr/bin/grep -F -q \
+  "User theme directory exists but theme.json is missing: $RUNTIME_STATE_ROOT/theme/theme.json"
+/bin/rm -rf "$RUNTIME_STATE_ROOT/theme"
+
 /bin/mkdir -p "$TMP/theme"
 /bin/cp "$ROOT/assets/portal-hero.png" "$TMP/theme/background.png"
 "$NODE" "$ROOT/scripts/write-theme.mjs" custom --output-dir "$TMP/theme" \
@@ -110,7 +126,19 @@ NO_DESKTOP_BACKUP="$TMP/theme-backup-without-desktop.json"
 "$NODE" "$ROOT/scripts/theme-config.mjs" restore "$NO_DESKTOP_CONFIG" "$NO_DESKTOP_BACKUP" >/dev/null
 /usr/bin/cmp -s "$NO_DESKTOP_CONFIG" "$TMP/original-without-desktop.toml"
 
+INSTALL_HOME="$TMP/install-home"
+/bin/mkdir -p "$INSTALL_HOME/.codex"
+/usr/bin/printf '%s\n' \
+  'model = "gpt-5"' \
+  'project_name = "中文测试"' > "$INSTALL_HOME/.codex/config.toml"
+/bin/cp "$INSTALL_HOME/.codex/config.toml" "$TMP/install-original.toml"
+HOME="$INSTALL_HOME" "$ROOT/scripts/install-dream-skin-macos.sh" \
+  --in-place --no-launchers --no-launch >/dev/null
+/usr/bin/cmp -s "$INSTALL_HOME/.codex/config.toml" "$TMP/install-original.toml"
+[ -f "$INSTALL_HOME/Library/Application Support/CodexDreamSkinStudio/theme-backup.json" ]
+[ ! -e "$INSTALL_HOME/Library/Application Support/CodexDreamSkinStudio/theme" ]
+
 /usr/bin/env -u HOME /bin/bash -c '. "$1/scripts/common-macos.sh"; [ -n "$HOME" ] && [ "$SKIN_VERSION" = "1.1.2" ]' _ "$ROOT"
 "$ROOT/scripts/doctor-macos.sh" >/dev/null
 
-printf 'PASS: syntax, payload, runtime-state safety, custom-theme, config round-trips, HOME recovery, signature, and doctor checks.\n'
+printf 'PASS: syntax, payload, theme fallback, fresh install, runtime-state safety, custom-theme, config round-trips, HOME recovery, signature, and doctor checks.\n'

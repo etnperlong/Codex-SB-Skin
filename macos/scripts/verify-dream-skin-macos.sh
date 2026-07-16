@@ -18,12 +18,13 @@ done
 
 discover_codex_app
 require_macos_runtime
+ACTIVE_THEME_DIR="$(active_theme_dir)"
 if [ "$PORT_EXPLICIT" = "false" ] && [ -f "$STATE_PATH" ]; then
   PORT="$(state_field port)"
 fi
 verified_cdp_endpoint "$PORT" || fail "Port $PORT is not a verified Codex loopback CDP endpoint."
 
-ARGS=("$INJECTOR" --verify --port "$PORT" --theme-dir "$THEME_DIR" --timeout-ms 30000)
+ARGS=("$INJECTOR" --verify --port "$PORT" --theme-dir "$ACTIVE_THEME_DIR" --timeout-ms 30000)
 [ -n "$SCREENSHOT" ] && ARGS+=(--screenshot "$SCREENSHOT")
 [ "$RELOAD" = "true" ] && ARGS+=(--reload)
 exec "$NODE" "${ARGS[@]}"

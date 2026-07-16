@@ -22,14 +22,15 @@ for required in \
   [ -s "$required" ] || fail "Required project file is missing or empty: $required"
 done
 
-PAYLOAD_JSON="$("$NODE" "$INJECTOR" --check-payload --theme-dir "$THEME_DIR")"
+ACTIVE_THEME_DIR="$(active_theme_dir)"
+PAYLOAD_JSON="$("$NODE" "$INJECTOR" --check-payload --theme-dir "$ACTIVE_THEME_DIR")"
 PORT=9341
 if [ -f "$STATE_PATH" ]; then
   PORT="$(state_field port)"
 fi
 LIVE="false"
 if [ -f "$STATE_PATH" ] && verified_cdp_endpoint "$PORT"; then
-  "$NODE" "$INJECTOR" --verify --port "$PORT" --theme-dir "$THEME_DIR" --timeout-ms 12000 >/dev/null
+  "$NODE" "$INJECTOR" --verify --port "$PORT" --theme-dir "$ACTIVE_THEME_DIR" --timeout-ms 12000 >/dev/null
   LIVE="true"
 fi
 [ "$REQUIRE_LIVE" = "false" ] || [ "$LIVE" = "true" ] || fail "No verified live Dream Skin session is active."
