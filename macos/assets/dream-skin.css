@@ -810,7 +810,11 @@ html.codex-dream-skin .dream-skin-home > div:first-child > div:first-child > div
 }
 
 html.codex-dream-skin .dream-skin-home > div:first-child > div:first-child > div:first-child::before {
-  border-radius: var(--ds-shape-hero-radius) 0 0 var(--ds-shape-hero-radius);
+  border-radius:
+    calc(var(--ds-shape-hero-radius) - var(--ds-shape-border-width))
+    0
+    0
+    calc(var(--ds-shape-hero-radius) - var(--ds-shape-border-width));
   background: linear-gradient(90deg, var(--ds-color-hero-overlay), var(--ds-color-hero-overlay-soft) 78%, transparent 100%);
 }
 
@@ -891,6 +895,9 @@ html.codex-dream-skin .dream-skin-home .group\/home-suggestions button:hover {
 html.codex-dream-skin .dream-skin-home .group\/home-suggestions button > span:first-child > span:first-child {
   width: var(--ds-layout-card-icon-size) !important;
   height: var(--ds-layout-card-icon-size) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   flex: 0 0 var(--ds-layout-card-icon-size) !important;
   margin: var(--ds-layout-card-icon-margin) !important;
   border-radius: var(--ds-shape-control-radius);
@@ -946,6 +953,9 @@ html.codex-dream-skin .composer-surface-chrome :is(input, textarea)::placeholder
 }
 
 html.codex-dream-skin .dream-skin-home div:has(> .horizontal-scroll-fade-mask .group\/project-selector) {
+  width: min(100%, var(--ds-layout-composer-max-width)) !important;
+  margin-inline: auto !important;
+  box-sizing: border-box;
   border-color: var(--ds-color-main-border);
   background: linear-gradient(180deg, var(--ds-color-main), var(--ds-color-main-alt)) !important;
 }

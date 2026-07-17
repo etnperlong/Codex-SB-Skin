@@ -61,6 +61,12 @@ fi
       !css.includes(`var(--ds-layout-sidebar-row-height)`)) {
     throw new Error("小而美 interaction and Home layout overrides are incomplete.");
   }
+  const composerWidthRules = [...css.matchAll(/width: min\(100%, var\(--ds-layout-composer-max-width\)\) !important;/g)];
+  if (composerWidthRules.length < 2 ||
+      !css.includes(`calc(var(--ds-shape-hero-radius) - var(--ds-shape-border-width))`) ||
+      !css.includes(`justify-content: center !important;`)) {
+    throw new Error("Home banner clipping, card icon centering, or composer alignment regression.");
+  }
   const references = new Set([...css.matchAll(/var\((--ds-[a-z0-9-]+)/g)].map((match) => match[1]));
   const supplied = new Set([
     ...Object.keys(theme.cssVariables.shared),
