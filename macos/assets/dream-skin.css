@@ -107,6 +107,10 @@ html.codex-dream-skin main.main-surface:not(.dream-skin-home-shell) {
 }
 
 html.codex-dream-skin main.main-surface:not(.dream-skin-home-shell) [role="main"] {
+  text-shadow: var(--ds-effect-media-text-shadow) !important;
+}
+
+html.codex-dream-skin main.main-surface:not(.dream-skin-home-shell) [role="main"] {
   background: linear-gradient(90deg, rgba(5, 13, 19, .24), rgba(5, 13, 19, .04)) !important;
   text-shadow: 0 1px 10px rgba(0, 0, 0, .32);
 }
@@ -569,10 +573,48 @@ html.codex-dream-skin aside.app-shell-left-panel button:hover {
   color: var(--ds-color-sidebar-text) !important;
 }
 
+html.codex-dream-skin aside.app-shell-left-panel button:is(
+  [aria-label="更新"],
+  [aria-label="Update"],
+  [title="更新"],
+  [title="Update"]
+) {
+  background: var(--ds-color-accent) !important;
+  color: var(--ds-color-accent-contrast) !important;
+}
+
+html.codex-dream-skin aside.app-shell-left-panel button:is(
+  [aria-label="更新"],
+  [aria-label="Update"],
+  [title="更新"],
+  [title="Update"]
+):hover {
+  background: var(--ds-color-accent-hover) !important;
+  color: var(--ds-color-accent-contrast) !important;
+}
+
+html.codex-dream-skin aside.app-shell-left-panel button:is(
+  [aria-label="更新"],
+  [aria-label="Update"],
+  [title="更新"],
+  [title="Update"]
+) * {
+  color: inherit !important;
+}
+
 html.codex-dream-skin aside.app-shell-left-panel button[aria-label^="切换模式"] {
   color: var(--ds-color-accent) !important;
   font-family: var(--ds-typography-display-font) !important;
   text-shadow: var(--ds-effect-accent-glow) !important;
+}
+
+/* The native brand button sets !important font utilities inside the Tailwind
+   "utilities" layer; an earlier layer is required to win the important cascade. */
+@layer theme {
+  html.codex-dream-skin aside.app-shell-left-panel button[aria-label^="切换模式"] {
+    font-size: var(--ds-typography-sidebar-brand-size) !important;
+    font-weight: var(--ds-typography-sidebar-brand-weight) !important;
+  }
 }
 
 html.codex-dream-skin aside.app-shell-left-panel button[aria-label^="切换模式"]::after {
@@ -583,8 +625,64 @@ html.codex-dream-skin aside.app-shell-left-panel [class~="bg-token-list-hover-ba
 html.codex-dream-skin aside.app-shell-left-panel [aria-current="page"] {
   background: var(--ds-color-sidebar-selected) !important;
   border: var(--ds-shape-border-width) solid var(--ds-color-sidebar-selected-border) !important;
-  box-shadow: inset var(--ds-layout-selected-indicator-width) 0 var(--ds-color-accent) !important;
-  color: var(--ds-color-sidebar-text) !important;
+  box-shadow: none !important;
+  color: var(--ds-color-sidebar-selected-text) !important;
+}
+
+html.codex-dream-skin aside.app-shell-left-panel :is(
+  [class~="bg-token-list-hover-background"],
+  [aria-current="page"]
+) :is(button, a, span, div, svg) {
+  color: inherit !important;
+}
+
+/* Sidebar density and typography follow the Pencil spec via layout tokens. */
+html.codex-dream-skin aside.app-shell-left-panel {
+  --height-toolbar: var(--ds-layout-sidebar-header-height);
+}
+
+html.codex-dream-skin aside.app-shell-left-panel,
+html.codex-dream-skin aside.app-shell-left-panel * {
+  --height-token-row: var(--ds-layout-sidebar-row-height) !important;
+  --height-token-nav-row: var(--ds-layout-sidebar-row-height) !important;
+  --radius-token-row: var(--ds-layout-sidebar-row-radius) !important;
+  --padding-row-cell-x: var(--ds-layout-sidebar-row-padding-x) !important;
+}
+
+html.codex-dream-skin aside.app-shell-left-panel :is(button, a, div)[class*="height-token-row"] {
+  font-size: var(--ds-typography-body-size) !important;
+  font-weight: var(--ds-typography-sidebar-item-weight) !important;
+  line-height: var(--ds-typography-body-line-height) !important;
+  gap: var(--ds-layout-sidebar-row-gap) !important;
+}
+
+html.codex-dream-skin aside.app-shell-left-panel :is(button, a, div)[class*="height-token-row"] svg.icon-xs {
+  width: var(--ds-layout-sidebar-icon-size) !important;
+  height: var(--ds-layout-sidebar-icon-size) !important;
+}
+
+html.codex-dream-skin aside.app-shell-left-panel :is(button, a, div)[class*="height-token-row"] span[class~="w-4"] {
+  width: var(--ds-layout-sidebar-icon-size) !important;
+}
+
+html.codex-dream-skin aside.app-shell-left-panel [class~="gap-px"] {
+  gap: var(--ds-layout-sidebar-list-gap) !important;
+}
+
+html.codex-dream-skin aside.app-shell-left-panel button[class*="section-toggle"] {
+  font-size: var(--ds-typography-sidebar-section-size) !important;
+  font-weight: var(--ds-typography-label-weight) !important;
+}
+
+html.codex-dream-skin aside.app-shell-left-panel :is(button, a, div):is(
+  [class~="bg-token-list-hover-background"],
+  [aria-current="page"]
+),
+html.codex-dream-skin aside.app-shell-left-panel :is(
+  [class~="bg-token-list-hover-background"],
+  [aria-current="page"]
+) [class*="height-token-row"] {
+  font-weight: var(--ds-typography-sidebar-selected-weight) !important;
 }
 
 html.codex-dream-skin main.main-surface {
@@ -599,9 +697,9 @@ html.codex-dream-skin main.main-surface {
 html.codex-dream-skin main.main-surface:not(.dream-skin-home-shell) {
   background:
     linear-gradient(90deg,
-      color-mix(in srgb, var(--ds-color-main) 95%, transparent) 0%,
-      color-mix(in srgb, var(--ds-color-main) 86%, transparent) 47%,
-      color-mix(in srgb, var(--ds-color-main-alt) 64%, transparent) 100%),
+      color-mix(in srgb, var(--ds-color-main) var(--ds-effect-task-media-start-opacity), transparent) 0%,
+      color-mix(in srgb, var(--ds-color-main) var(--ds-effect-task-media-middle-opacity), transparent) 47%,
+      color-mix(in srgb, var(--ds-color-main-alt) var(--ds-effect-task-media-end-opacity), transparent) 100%),
     var(--dream-skin-art) 76% center / cover no-repeat !important;
 }
 
@@ -632,6 +730,7 @@ html.codex-dream-skin [data-message-author-role="assistant"] {
 
 html.codex-dream-skin #codex-dream-skin-chrome {
   border-radius: var(--ds-shape-main-radius);
+  opacity: var(--ds-effect-chrome-opacity);
 }
 
 html.codex-dream-skin .dream-skin-brand {
@@ -695,6 +794,11 @@ html.codex-dream-skin .dream-skin-home {
   --thread-content-max-width: min(var(--ds-layout-content-max-width), calc(100cqw - var(--ds-layout-hero-inset))) !important;
 }
 
+html.codex-dream-skin .dream-skin-home > div:first-child > div:first-child {
+  flex-basis: var(--ds-layout-home-lead-height) !important;
+  min-height: var(--ds-layout-home-lead-height) !important;
+}
+
 html.codex-dream-skin .dream-skin-home > div:first-child > div:first-child > div:first-child {
   width: calc(100% - var(--ds-layout-hero-inset)) !important;
   height: var(--ds-layout-hero-height) !important;
@@ -716,6 +820,15 @@ html.codex-dream-skin .dream-skin-home > div:first-child > div:first-child > div
 
 html.codex-dream-skin .dream-skin-home > div:first-child > div:first-child > div:first-child > div:first-child > div:first-child {
   width: var(--ds-layout-hero-text-width) !important;
+}
+
+html.codex-dream-skin .dream-skin-home div:has(> .group\/home-suggestions) {
+  inset-inline: 0 !important;
+}
+
+html.codex-dream-skin .dream-skin-home div:has(> .relative > .composer-surface-chrome) {
+  width: min(100%, var(--ds-layout-composer-max-width)) !important;
+  margin-inline: auto !important;
 }
 
 html.codex-dream-skin .dream-skin-home [data-feature="game-source"] {
@@ -744,10 +857,20 @@ html.codex-dream-skin .dream-skin-home [data-feature="game-source"] button {
   border-radius: var(--ds-shape-pill-radius);
   background: var(--ds-color-accent-soft);
   color: var(--ds-color-card-icon) !important;
+  font-size: .78em;
+  line-height: 1.2;
+  vertical-align: .08em;
+  white-space: nowrap;
 }
 
 html.codex-dream-skin .dream-skin-home .group\/home-suggestions button {
   min-height: var(--ds-layout-card-min-height) !important;
+  padding: var(--ds-layout-card-padding) !important;
+  gap: var(--ds-layout-card-gap) !important;
+  flex-direction: var(--ds-layout-card-direction) !important;
+  align-items: var(--ds-layout-card-align) !important;
+  justify-content: flex-start !important;
+  text-align: var(--ds-layout-card-text-align) !important;
   border: var(--ds-shape-border-width) solid var(--ds-color-card-border) !important;
   border-radius: var(--ds-shape-card-radius) !important;
   background: linear-gradient(145deg, var(--ds-color-card), var(--ds-color-card-alt)) !important;
@@ -766,13 +889,31 @@ html.codex-dream-skin .dream-skin-home .group\/home-suggestions button:hover {
 }
 
 html.codex-dream-skin .dream-skin-home .group\/home-suggestions button > span:first-child > span:first-child {
-  border-radius: var(--ds-shape-avatar-radius);
-  color: var(--ds-color-card-icon-text) !important;
-  background: linear-gradient(145deg, var(--ds-color-card-icon), var(--ds-color-accent-secondary)) !important;
+  width: var(--ds-layout-card-icon-size) !important;
+  height: var(--ds-layout-card-icon-size) !important;
+  flex: 0 0 var(--ds-layout-card-icon-size) !important;
+  margin: var(--ds-layout-card-icon-margin) !important;
+  border-radius: var(--ds-shape-control-radius);
+  color: var(--ds-color-card-icon) !important;
+  background: var(--ds-color-accent-soft) !important;
+  box-shadow: none !important;
 }
 
 html.codex-dream-skin .dream-skin-home .group\/home-suggestions button svg {
-  color: var(--ds-color-card-icon-text) !important;
+  width: 16px !important;
+  height: 16px !important;
+  color: var(--ds-color-card-icon) !important;
+}
+
+html.codex-dream-skin .dream-skin-home .group\/home-suggestions button > span:first-child {
+  width: auto !important;
+  flex: 0 0 auto !important;
+  justify-content: flex-start !important;
+}
+
+html.codex-dream-skin .dream-skin-home .group\/home-suggestions button > span:last-child {
+  align-items: var(--ds-layout-card-copy-align) !important;
+  text-align: var(--ds-layout-card-text-align) !important;
 }
 
 html.codex-dream-skin .composer-surface-chrome {
@@ -792,6 +933,7 @@ html.codex-dream-skin .composer-surface-chrome::before {
   color: var(--ds-color-control-primary-text);
   background: linear-gradient(145deg, var(--ds-color-card-icon), var(--ds-color-control-primary)) !important;
   box-shadow: var(--ds-effect-accent-glow);
+  opacity: var(--ds-effect-composer-marker-opacity);
 }
 
 html.codex-dream-skin .composer-surface-chrome :is(input, textarea, [contenteditable="true"], .ProseMirror) {
@@ -838,10 +980,15 @@ html.codex-dream-skin :is([role="dialog"], [role="menu"], [role="listbox"], [rol
 }
 
 html.codex-dream-skin [role="tooltip"] {
+  border: var(--ds-shape-border-width) solid var(--ds-color-popover-border) !important;
   border-radius: var(--ds-shape-control-radius) !important;
   background: var(--ds-color-tooltip) !important;
   color: var(--ds-color-tooltip-text) !important;
   font-size: var(--ds-typography-small-size);
+}
+
+html.codex-dream-skin [role="tooltip"] * {
+  color: inherit !important;
 }
 
 html.codex-dream-skin :is(pre, code, kbd, samp) {
@@ -849,9 +996,14 @@ html.codex-dream-skin :is(pre, code, kbd, samp) {
 }
 
 html.codex-dream-skin pre {
-  border: var(--ds-shape-border-width) solid var(--ds-color-divider);
+  border: var(--ds-shape-border-width) solid var(--ds-color-code-border);
   border-radius: var(--ds-shape-control-radius);
-  background: var(--ds-color-surface-elevated) !important;
+  background: var(--ds-color-code) !important;
+  color: var(--ds-color-code-text) !important;
+}
+
+html.codex-dream-skin pre code {
+  color: inherit !important;
 }
 
 html.codex-dream-skin :is(hr, [role="separator"]) {

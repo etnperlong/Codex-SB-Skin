@@ -5,7 +5,7 @@ import { normalizeTheme } from "./theme-schema.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
-const SKIN_VERSION = "1.2.0";
+const SKIN_VERSION = "1.3.0";
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]"]);
 const MAX_ART_BYTES = 16 * 1024 * 1024;
 
@@ -270,6 +270,7 @@ async function removeFromSession(session) {
 
 async function verifyRemovedSession(session) {
   return session.evaluate(`(() =>
+    Boolean(document.documentElement) &&
     !document.documentElement.classList.contains('codex-dream-skin') &&
     !document.getElementById('codex-dream-skin-style') &&
     !document.getElementById('codex-dream-skin-chrome') &&
@@ -279,6 +280,9 @@ async function verifyRemovedSession(session) {
 
 async function verifySession(session) {
   return session.evaluate(`(() => {
+    if (!document.documentElement || !document.body) {
+      return { pass: false, transient: true };
+    }
     const box = (node) => {
       if (!node) return null;
       const r = node.getBoundingClientRect();
@@ -300,6 +304,12 @@ async function verifySession(session) {
     const hero = box(home?.firstElementChild?.firstElementChild?.firstElementChild);
     const projectButton = box(home?.querySelector('.group\\\\/project-selector > button'));
     const composer = box(document.querySelector('.composer-surface-chrome'));
+    const composerEditor = document.querySelector(
+      '.composer-surface-chrome :is(textarea, input, [contenteditable="true"], .ProseMirror)'
+    );
+    const composerHasDraft = Boolean(
+      String(composerEditor?.value ?? composerEditor?.textContent ?? '').trim()
+    );
     const sidebar = box(document.querySelector('aside.app-shell-left-panel'));
     const chrome = document.getElementById('codex-dream-skin-chrome');
     const result = {
@@ -313,6 +323,7 @@ async function verifySession(session) {
       hero,
       cards: cardBoxes,
       visibleCardCount: visibleCards.length,
+      composerHasDraft,
       projectButton,
       composer,
       sidebar,
@@ -328,11 +339,12 @@ async function verifySession(session) {
     // Project selector markup varies across Codex builds — soft requirement.
     const homePass = !result.homeRoute || (
       result.homePresent && result.hero?.visible && result.hero.width >= 280 && result.hero.height >= 120 &&
-      result.visibleCardCount >= 1 && result.visibleCardCount <= 6
+      ((result.visibleCardCount >= 1 && result.visibleCardCount <= 6) || result.composerHasDraft)
     );
     result.pass = Boolean(basePass && homePass);
     result.softNotes = {
       projectButtonOptional: !result.projectButton?.visible,
+      suggestionsSuppressedByDraft: result.homeRoute && result.composerHasDraft && result.visibleCardCount === 0,
     };
     return result;
   })()`);

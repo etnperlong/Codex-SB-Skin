@@ -35,7 +35,32 @@ fi
   const root = process.argv[1];
   const { normalizeTheme } = await import(pathToFileURL(`${root}/scripts/theme-schema.mjs`));
   const theme = normalizeTheme(JSON.parse(fs.readFileSync(`${root}/assets/theme.json`, "utf8")));
+  if (theme.id !== "xiao-er-mei" || theme.name !== "小而美" ||
+      theme.tokens.light.color.accent !== "#07c160" ||
+      theme.tokens.light.color.messageUser !== "#95ec69" ||
+      theme.tokens.light.color.sidebarSelected !== "#07c160" ||
+      theme.tokens.light.color.sidebarSelectedText !== "#ffffff" ||
+      theme.tokens.shared.layout.cardDirection !== "row" ||
+      theme.tokens.shared.layout.composerMaxWidth !== "820px" ||
+      theme.tokens.shared.layout.sidebarRowHeight !== "44px" ||
+      theme.tokens.shared.layout.sidebarRowPaddingX !== "12px" ||
+      theme.tokens.shared.typography.sidebarItemWeight !== "400" ||
+      theme.tokens.shared.typography.sidebarBrandSize !== "15px" ||
+      theme.tokens.shared.shape.messageRadius !== "6px" ||
+      theme.tokens.light.effect.chromeOpacity !== "0" ||
+      theme.tokens.dark.effect.taskMediaEndOpacity !== "76%") {
+    throw new Error("Bundled 小而美 semantic contract is incomplete.");
+  }
   const css = fs.readFileSync(`${root}/assets/dream-skin.css`, "utf8");
+  if (!css.includes(`html.codex-dream-skin [role="tooltip"] *`)) {
+    throw new Error("Tooltip descendants must inherit the semantic tooltip foreground.");
+  }
+  if (!css.includes(`[aria-label="更新"]`) ||
+      !css.includes(`var(--ds-color-sidebar-selected-text)`) ||
+      !css.includes(`var(--ds-layout-composer-max-width)`) ||
+      !css.includes(`var(--ds-layout-sidebar-row-height)`)) {
+    throw new Error("小而美 interaction and Home layout overrides are incomplete.");
+  }
   const references = new Set([...css.matchAll(/var\((--ds-[a-z0-9-]+)/g)].map((match) => match[1]));
   const supplied = new Set([
     ...Object.keys(theme.cssVariables.shared),
@@ -204,7 +229,7 @@ HOME="$INSTALL_HOME" "$ROOT/scripts/install-dream-skin-macos.sh" \
 [ -f "$INSTALL_HOME/Library/Application Support/CodexDreamSkinStudio/theme-backup.json" ]
 [ ! -e "$INSTALL_HOME/Library/Application Support/CodexDreamSkinStudio/theme" ]
 
-/usr/bin/env -u HOME /bin/bash -c '. "$1/scripts/common-macos.sh"; [ -n "$HOME" ] && [ "$SKIN_VERSION" = "1.2.0" ]' _ "$ROOT"
+/usr/bin/env -u HOME /bin/bash -c '. "$1/scripts/common-macos.sh"; [ -n "$HOME" ] && [ "$SKIN_VERSION" = "1.3.0" ]' _ "$ROOT"
 "$ROOT/scripts/doctor-macos.sh" >/dev/null
 
 printf 'PASS: syntax, payload, theme fallback, fresh install, runtime-state safety, custom-theme, config round-trips, HOME recovery, signature, and doctor checks.\n'

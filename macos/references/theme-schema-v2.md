@@ -37,17 +37,22 @@ ignored and invalid values fail payload construction.
 ## Token groups
 
 - `typography`: UI, display, monospace and quote font stacks; sizes, weights,
-  line height and letter spacing.
+  line height and letter spacing, plus sidebar item/selected weights and the
+  sidebar section and brand type scale.
 - `shape`: radii and border/focus widths for the shell, cards, messages,
   composer, controls and popovers.
-- `layout`: content width, banner geometry, card height and selected-item
-  indicator dimensions.
+- `layout`: content width, banner geometry, Home lead height, card direction,
+  spacing and icon geometry, Home composer width, composer marker size,
+  selected-item indicator dimensions, and sidebar density (row height, radius,
+  padding, gaps, icon size and header height).
 - `motion`: transition durations, easing, hover lift and decoration timing.
 - `blur`: content, composer and popover backdrop blur.
-- `color`: canvas, sidebar, header, surfaces, text, accent states, cards,
-  messages, composer, controls, project selector, hero, popovers, selection,
-  scrollbars, status colors and decorative elements.
-- `effect`: per-mode opacity, shadows, text shadow and accent glow.
+- `color`: canvas, sidebar and selected-item text, header, surfaces, code
+  blocks, text, accent states, cards, messages, composer, controls, project
+  selector, hero, popovers, selection, scrollbars, status colors and
+  decorative elements.
+- `effect`: per-mode canvas, decorative chrome, composer-marker and task-media
+  opacity, shadows, text shadow and accent glow.
 
 ## Pencil mapping
 
