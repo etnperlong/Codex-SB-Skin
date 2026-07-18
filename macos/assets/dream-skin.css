@@ -1436,8 +1436,9 @@ html.codex-dream-skin[data-dream-tokens="2"] .dream-skin-home .group\/home-sugge
 html.codex-dream-skin[data-dream-tokens="2"] .dream-skin-home .group\/home-suggestions button > span:first-child > span:first-child {
   width: var(--ds-layout-card-icon-size) !important;
   height: var(--ds-layout-card-icon-size) !important;
-  display: grid !important;
-  place-items: center;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   flex: 0 0 var(--ds-layout-card-icon-size) !important;
   margin: var(--ds-layout-card-icon-margin) !important;
   border: var(--ds-shape-border-width) solid var(--ds-color-focus-ring);
