@@ -88,7 +88,8 @@ fi
   if (missing.length) throw new Error(`Missing semantic theme variables: ${missing.join(", ")}`);
   if (!css.includes(`[aria-label="更新"]`) ||
       !css.includes(`[role="tooltip"] *`) ||
-      !css.includes(`var(--ds-effect-task-media-end-opacity)`)) {
+      !css.includes(`var(--ds-effect-task-media-end-opacity)`) ||
+      !css.includes(`[data-dream-tokens="2"][data-dream-art-wide="true"]:has(main.main-surface.dream-skin-home-shell) body`)) {
     throw new Error("Small & Beauty interaction styles are incomplete.");
   }
 ' "$ROOT"

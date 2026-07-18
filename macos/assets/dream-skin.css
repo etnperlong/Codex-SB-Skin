@@ -1276,6 +1276,12 @@ html.codex-dream-skin[data-dream-tokens="2"] aside.app-shell-left-panel button[a
     font-size: var(--ds-typography-sidebar-brand-size) !important;
     font-weight: var(--ds-typography-sidebar-brand-weight) !important;
   }
+
+  html.codex-dream-skin[data-dream-tokens="2"] aside.app-shell-left-panel
+    [class*="text-token-input-placeholder-foreground"] {
+    color: var(--ds-color-sidebar-muted) !important;
+    opacity: 1 !important;
+  }
 }
 
 /* Main surface and header. */
@@ -1559,4 +1565,61 @@ html.codex-dream-skin[data-dream-tokens="2"] [role="tooltip"] {
 
 html.codex-dream-skin[data-dream-tokens="2"] [role="tooltip"] * {
   color: inherit !important;
+}
+
+/* Schema v2 themes own their Home hero geometry. Keep ultrawide artwork in
+   that tokenized hero instead of promoting a bright banner to the full window. */
+html.codex-dream-skin[data-dream-tokens="2"][data-dream-art-wide="true"]:has(main.main-surface.dream-skin-home-shell) body {
+  background-color: var(--ds-color-canvas) !important;
+  background-image: none !important;
+}
+
+html.codex-dream-skin[data-dream-tokens="2"][data-dream-art-wide="true"]:has(main.main-surface.dream-skin-home-shell)
+  aside.app-shell-left-panel {
+  background: linear-gradient(180deg, var(--ds-color-sidebar), var(--ds-color-sidebar-alt)) !important;
+  border: var(--ds-shape-border-width) solid var(--ds-color-sidebar-border) !important;
+  border-left: 0 !important;
+  border-radius: var(--ds-shape-sidebar-radius) !important;
+  box-shadow: var(--ds-effect-sidebar-shadow) !important;
+}
+
+html.codex-dream-skin[data-dream-tokens="2"][data-dream-art-wide="true"] main.main-surface.dream-skin-home-shell {
+  background: var(--ds-color-main) !important;
+  border: var(--ds-shape-border-width) solid var(--ds-color-main-border) !important;
+  border-right: 0 !important;
+  border-bottom: 0 !important;
+  border-radius: var(--ds-shape-main-radius) !important;
+  box-shadow: var(--ds-effect-main-shadow) !important;
+}
+
+html.codex-dream-skin[data-dream-tokens="2"][data-dream-art-wide="true"] main.main-surface.dream-skin-home-shell
+  > header.app-header-tint {
+  background: var(--ds-color-header) !important;
+  border-bottom: var(--ds-shape-border-width) solid var(--ds-color-header-border) !important;
+  text-shadow: none !important;
+}
+
+html.codex-dream-skin[data-dream-tokens="2"][data-dream-art-wide="true"] main.main-surface.dream-skin-home-shell
+  .dream-skin-home > div:first-child > div:first-child > div:first-child {
+  border: var(--ds-shape-border-width) solid var(--ds-color-hero-border) !important;
+  border-radius: var(--ds-shape-hero-radius) !important;
+  background-color: var(--ds-color-hero) !important;
+  background-image: var(--dream-skin-art) !important;
+  background-position: var(--ds-art-position) !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  box-shadow: var(--ds-effect-hero-shadow) !important;
+}
+
+html.codex-dream-skin[data-dream-tokens="2"][data-dream-art-wide="true"] main.main-surface.dream-skin-home-shell
+  .dream-skin-home > div:first-child > div:first-child > div:first-child::before {
+  content: "" !important;
+  background: linear-gradient(90deg, var(--ds-color-hero-overlay), var(--ds-color-hero-overlay-soft) 78%, transparent 100%) !important;
+}
+
+html.codex-dream-skin[data-dream-tokens="2"][data-dream-art-wide="true"] main.main-surface.dream-skin-home-shell
+  .dream-skin-home .group\/home-suggestions button {
+  background: linear-gradient(145deg, var(--ds-color-card), var(--ds-color-card-alt)) !important;
+  box-shadow: var(--ds-effect-card-shadow) !important;
+  backdrop-filter: blur(var(--ds-blur-content)) saturate(105%) !important;
 }
