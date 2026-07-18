@@ -59,7 +59,20 @@ fi
   import { pathToFileURL } from "node:url";
   const root = process.argv[1];
   const { buildThemeTokens } = await import(pathToFileURL(`${root}/scripts/theme-schema.mjs`));
-  const resolved = buildThemeTokens(JSON.parse(fs.readFileSync(`${root}/assets/theme.json`, "utf8")));
+  const raw = JSON.parse(fs.readFileSync(`${root}/assets/theme.json`, "utf8"));
+  const resolved = buildThemeTokens(raw);
+  if (raw.id !== "small-and-beauty" || raw.name !== "Small & Beauty" ||
+      raw.art?.safeArea !== "left" || raw.art?.taskMode !== "banner" ||
+      resolved.tokens.light.color.accent !== "#07c160" ||
+      resolved.tokens.light.color.messageUser !== "#95ec69" ||
+      resolved.tokens.shared.layout.cardDirection !== "row" ||
+      resolved.tokens.shared.layout.cardGlyphSize !== "18px" ||
+      resolved.tokens.shared.layout.composerMaxWidth !== "820px" ||
+      resolved.tokens.shared.layout.sidebarRowHeight !== "44px" ||
+      resolved.tokens.shared.typography.sidebarBrandSize !== "15px" ||
+      resolved.tokens.light.effect.chromeOpacity !== "0") {
+    throw new Error("Bundled Small & Beauty semantic contract is incomplete.");
+  }
   const css = fs.readFileSync(`${root}/assets/dream-skin.css`, "utf8");
   const references = new Set(
     [...css.matchAll(/var\((--ds-(?:color|typography|shape|layout|motion|blur|effect)-[a-z0-9-]+)/g)]
@@ -73,6 +86,11 @@ fi
   const aliases = new Set([...css.matchAll(/^\s*(--ds-[a-z0-9-]+):/gm)].map((match) => match[1]));
   const missing = [...references].filter((name) => !supplied.has(name) && !aliases.has(name));
   if (missing.length) throw new Error(`Missing semantic theme variables: ${missing.join(", ")}`);
+  if (!css.includes(`[aria-label="更新"]`) ||
+      !css.includes(`[role="tooltip"] *`) ||
+      !css.includes(`var(--ds-effect-task-media-end-opacity)`)) {
+    throw new Error("Small & Beauty interaction styles are incomplete.");
+  }
 ' "$ROOT"
 "$NODE" "$ROOT/tests/image-metadata.test.mjs"
 "$NODE" "$ROOT/tests/injector-bootstrap.test.mjs"
@@ -528,7 +546,7 @@ PAYLOAD_JSON="$("$NODE" "$ROOT/scripts/injector.mjs" --check-payload --theme-dir
 "$NODE" -e '
   const value = JSON.parse(process.argv[1]);
   if (!value.pass || value.themeName !== "测试主题" || value.imageBytes < 1) process.exit(1);
-  if (value.artMetadata?.width !== 2168 || value.artMetadata?.height !== 725) process.exit(1);
+  if (value.artMetadata?.width !== 2160 || value.artMetadata?.height !== 720) process.exit(1);
   if (!value.artMetadata.wide || value.artMetadata.aspect !== "ultrawide") process.exit(1);
   if (!Number.isFinite(value.timings?.buildMs) || value.timings.buildMs < 0) process.exit(1);
 ' "$PAYLOAD_JSON"

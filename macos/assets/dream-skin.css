@@ -1087,6 +1087,15 @@ html.codex-dream-skin [data-message-author-role] { border-radius: 16px; }
    Token defaults resolve to the adaptive core variables, so partial v2
    themes stay coherent with image analysis. */
 
+html.codex-dream-skin[data-dream-tokens="2"] {
+  --ds-task-immersive-edge: color-mix(in srgb,
+    var(--ds-color-main) var(--ds-effect-task-media-start-opacity), transparent);
+  --ds-task-immersive-mid: color-mix(in srgb,
+    var(--ds-color-main) var(--ds-effect-task-media-middle-opacity), transparent);
+  --ds-task-immersive-far: color-mix(in srgb,
+    var(--ds-color-main-alt) var(--ds-effect-task-media-end-opacity), transparent);
+}
+
 html.codex-dream-skin[data-dream-tokens="2"] body {
   background: var(--ds-color-canvas) !important;
   color: var(--ds-color-text) !important;
@@ -1181,11 +1190,40 @@ html.codex-dream-skin[data-dream-tokens="2"] aside.app-shell-left-panel a:hover 
   color: var(--ds-color-accent) !important;
 }
 
+html.codex-dream-skin[data-dream-tokens="2"] aside.app-shell-left-panel button:is(
+  [aria-label="更新"],
+  [aria-label="Update"],
+  [title="更新"],
+  [title="Update"]
+) {
+  background: var(--ds-color-accent) !important;
+  color: var(--ds-color-accent-contrast) !important;
+}
+
+html.codex-dream-skin[data-dream-tokens="2"] aside.app-shell-left-panel button:is(
+  [aria-label="更新"],
+  [aria-label="Update"],
+  [title="更新"],
+  [title="Update"]
+):hover {
+  background: var(--ds-color-accent-hover) !important;
+  color: var(--ds-color-accent-contrast) !important;
+}
+
+html.codex-dream-skin[data-dream-tokens="2"] aside.app-shell-left-panel button:is(
+  [aria-label="更新"],
+  [aria-label="Update"],
+  [title="更新"],
+  [title="Update"]
+) * {
+  color: inherit !important;
+}
+
 html.codex-dream-skin[data-dream-tokens="2"] aside.app-shell-left-panel [class~="bg-token-list-hover-background"],
 html.codex-dream-skin[data-dream-tokens="2"] aside.app-shell-left-panel [aria-current="page"] {
   background: var(--ds-color-sidebar-selected) !important;
   border: var(--ds-shape-border-width) solid var(--ds-color-sidebar-selected-border) !important;
-  box-shadow: none !important;
+  box-shadow: inset var(--ds-layout-selected-indicator-width) 0 var(--ds-color-accent) !important;
   color: var(--ds-color-sidebar-selected-text) !important;
   font-weight: var(--ds-typography-sidebar-selected-weight) !important;
 }
@@ -1209,6 +1247,11 @@ html.codex-dream-skin[data-dream-tokens="2"] aside.app-shell-left-panel
   :is(button, a, div)[class*="height-token-row"] svg.icon-xs {
   width: var(--ds-layout-sidebar-icon-size) !important;
   height: var(--ds-layout-sidebar-icon-size) !important;
+}
+
+html.codex-dream-skin[data-dream-tokens="2"] aside.app-shell-left-panel
+  :is(button, a, div)[class*="height-token-row"] span[class~="w-4"] {
+  width: var(--ds-layout-sidebar-icon-size) !important;
 }
 
 html.codex-dream-skin[data-dream-tokens="2"] aside.app-shell-left-panel [class~="gap-px"] {
@@ -1401,7 +1444,7 @@ html.codex-dream-skin[data-dream-tokens="2"] .dream-skin-home .group\/home-sugge
 html.codex-dream-skin[data-dream-tokens="2"] .dream-skin-home .group\/home-suggestions button svg {
   width: var(--ds-layout-card-glyph-size) !important;
   height: var(--ds-layout-card-glyph-size) !important;
-  color: var(--ds-color-card-icon) !important;
+  color: var(--ds-color-card-icon-text) !important;
 }
 
 html.codex-dream-skin[data-dream-tokens="2"] .dream-skin-home .group\/home-suggestions button > span:last-child {
@@ -1512,4 +1555,8 @@ html.codex-dream-skin[data-dream-tokens="2"] [role="tooltip"] {
   border-radius: var(--ds-shape-control-radius) !important;
   background: var(--ds-color-tooltip) !important;
   color: var(--ds-color-tooltip-text) !important;
+}
+
+html.codex-dream-skin[data-dream-tokens="2"] [role="tooltip"] * {
+  color: inherit !important;
 }
